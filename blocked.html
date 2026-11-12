@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>施工中断 · 专注城市建造</title>
+<link rel="icon" href="icons/icon128.png" />
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:linear-gradient(160deg,#33302a,#17150f);color:#f5ecdd}
+  .card{max-width:500px;width:100%;text-align:center;background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:36px 28px}
+  .big{font-size:76px;line-height:1}
+  h1{margin:14px 0 8px;font-size:24px}
+  p{margin:6px 0;color:#cfc0a5;font-size:15px;line-height:1.65}
+  .host{color:#ffb59d;font-weight:700;word-break:break-all}
+  .btns{display:flex;gap:10px;justify-content:center;margin-top:22px;flex-wrap:wrap}
+  a.btn,button.btn{border:0;cursor:pointer;text-decoration:none;font-size:15px;font-weight:600;padding:11px 20px;border-radius:999px}
+  a.btn{background:#d96c2c;color:#fff}
+  button.btn{background:rgba(255,255,255,.12);color:#f5ecdd}
+</style>
+</head>
+<body>
+  <main class="card">
+    <div class="big">🏚️</div>
+    <h1>本次施工倒塌了</h1>
+    <p>施工专注期间你打开了黑名单网站 <span class="host" id="hostText">（分心网站）</span>，<br />这一轮施工全部作废，不计入建筑进度。</p>
+    <p>好消息：之前已经累积的进度还在。回到工地现场，重新专注一轮，把它接着盖起来。</p>
+    <div class="btns">
+      <a class="btn" href="index.html">🏗️ 回到施工现场</a>
+      <button class="btn" id="closeBtn" type="button">关闭此标签页</button>
+    </div>
+  </main>
+  <script src="blocked.js"></script>
+</body>
+</html>

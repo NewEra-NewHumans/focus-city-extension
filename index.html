@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>专注城市建造（离线版）</title>
+<link rel="icon" href="icons/icon128.png" />
+<style>
+  :root{
+    --bg:#f3efe7; --card:#ffffff; --card2:#faf6ee; --ink:#2b2620; --ink2:#7d7466;
+    --line:#e6ddcb; --teal:#14666b; --teal2:#1f8a90; --orange:#e07b39; --orange2:#d96c2c;
+    --gold:#e9a13b; --red:#d95f4b; --radius:16px; --shadow:0 8px 24px rgba(90,64,20,.08);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    font-size:15px;line-height:1.55}
+  button{font:inherit;cursor:pointer}
+  input{font:inherit}
+  .wrap{max-width:1180px;margin:0 auto;padding:18px 16px 40px}
+  header.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+  header.top .logo{width:44px;height:44px;border-radius:12px}
+  header.top h1{margin:0;font-size:22px;letter-spacing:.5px}
+  header.top .sub{color:var(--ink2);font-size:13px}
+  header.top .chips{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+  .chip{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 13px;font-size:13.5px;box-shadow:var(--shadow)}
+  .chip b{color:var(--orange2)}
+  .layout{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:16px;align-items:start}
+  @media (max-width:900px){.layout{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-bottom:16px}
+  .card h2{margin:0 0 12px;font-size:17px}
+  .card h2 .hint{font-size:12.5px;color:var(--ink2);font-weight:400;margin-left:8px}
+  .lbl{font-size:13px;color:var(--ink2);margin:14px 0 8px;font-weight:600;letter-spacing:.4px}
+
+  .site-view{border-radius:14px;border:1px solid var(--line);overflow:hidden;
+    background:linear-gradient(180deg,#bfe0ea 0%,#e8f3e9 62%,#d9e8c3 100%)}
+  .site-view .bld{height:250px;display:flex;align-items:flex-end;justify-content:center;padding-top:8px}
+  .site-view .bld svg{height:100%}
+  .site-view .ground{height:10px;background:linear-gradient(180deg,#a8c686,#86ad60)}
+  .proj-name{font-size:19px;font-weight:800;margin-top:14px}
+  .proj-loc{color:var(--ink2);font-size:13.5px}
+  .progress{height:12px;background:#eee5d2;border-radius:999px;overflow:hidden;margin:12px 0 6px}
+  .progress > div{height:100%;background:linear-gradient(90deg,var(--gold),var(--orange));width:0%;transition:width .4s}
+  .proj-progress-txt{font-size:13.5px;color:var(--ink2)}
+  .proj-progress-txt b{color:var(--orange2)}
+
+  .dur-chips{display:flex;gap:8px;flex-wrap:wrap}
+  .dur{border:1.5px solid var(--line);background:var(--card2);border-radius:999px;padding:6px 15px;font-size:14px}
+  .dur.sel{border-color:var(--orange2);background:var(--orange2);color:#fff;font-weight:700}
+  .slider-row{display:flex;align-items:center;gap:12px;margin-top:12px}
+  .slider-row input[type=range]{flex:1;accent-color:var(--orange2)}
+  .slider-row .val{font-weight:700;color:var(--orange2);min-width:76px;text-align:right}
+  .tag-chips{display:flex;gap:8px;flex-wrap:wrap}
+  .tag{border:1.5px solid var(--line);background:var(--card2);border-radius:999px;padding:5px 14px;font-size:13.5px}
+  .tag.sel{border-color:var(--teal);background:#e5f2f2;color:var(--teal);font-weight:700}
+  .note-input{width:100%;margin-top:10px;border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;background:#fff}
+  .note-input:focus{outline:none;border-color:var(--teal2)}
+  .switch-row{display:flex;align-items:center;gap:10px;margin-top:16px;flex-wrap:wrap}
+  .switch{position:relative;width:46px;height:26px;flex:none}
+  .switch input{opacity:0;width:100%;height:100%;position:absolute;margin:0;cursor:pointer}
+  .switch .tr{position:absolute;inset:0;background:#d3c9b4;border-radius:999px;transition:.2s;pointer-events:none}
+  .switch .tr::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+  .switch input:checked + .tr{background:var(--teal)}
+  .switch input:checked + .tr::after{left:23px}
+  .switch-row .desc{font-size:13px;color:var(--ink2)}
+  .build-btn{width:100%;margin-top:18px;border:0;border-radius:14px;padding:15px;font-size:18px;font-weight:800;color:#fff;
+    background:linear-gradient(135deg,var(--orange),var(--orange2));box-shadow:0 10px 22px rgba(217,108,44,.32);letter-spacing:1px}
+  .build-btn:hover{filter:brightness(1.06)}
+  .build-btn:disabled{background:#cfc6b2;box-shadow:none;cursor:not-allowed}
+  .sess-count{font-size:52px;font-weight:800;letter-spacing:2px;text-align:center;margin:12px 0 0;font-variant-numeric:tabular-nums;color:var(--teal)}
+  .sess-stage{text-align:center;color:var(--orange2);font-weight:700;margin-top:2px}
+  .sess-meta{text-align:center;color:var(--ink2);font-size:13.5px;margin-top:4px}
+  .abandon-btn{width:100%;margin-top:14px;border:1.5px solid #ecc9c2;background:#fdf1ee;color:var(--red);border-radius:12px;padding:11px;font-weight:700}
+  .abandon-btn.confirm{background:var(--red);color:#fff;border-color:var(--red)}
+
+  .block-list{display:flex;gap:8px;flex-wrap:wrap}
+  .site{display:inline-flex;align-items:center;gap:7px;background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:5px 8px 5px 13px;font-size:13.5px}
+  .site button{border:0;background:#efe8d8;border-radius:50%;width:20px;height:20px;line-height:1;color:var(--ink2)}
+  .block-add{display:flex;gap:8px;margin-top:12px}
+  .block-add input{flex:1;border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;min-width:0}
+  .block-add input:focus{outline:none;border-color:var(--teal2)}
+  .small-btn{border:0;border-radius:10px;padding:9px 16px;background:var(--teal);color:#fff;font-weight:700}
+  .preset-row{margin-top:10px;font-size:13px;color:var(--ink2)}
+  .preset-row button{border:1px dashed #c3b894;background:#fff;border-radius:999px;padding:3px 11px;margin:2px 2px;font-size:12.5px;color:var(--teal)}
+  .warn-note{font-size:12.5px;color:#9a6a1f;background:#fdf6e3;border:1px solid #f0dfae;border-radius:10px;padding:9px 12px;margin-top:12px}
+
+  .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+  .stat{background:var(--card2);border:1px solid var(--line);border-radius:13px;padding:11px 8px;text-align:center}
+  .stat .num{font-size:21px;font-weight:800;color:var(--teal)}
+  .stat .cap{font-size:12px;color:var(--ink2)}
+  .level-row{display:flex;align-items:center;gap:10px;margin-top:12px}
+  .level-row .lv{font-weight:800;color:var(--orange2);white-space:nowrap}
+  .level-row .progress{flex:1;margin:0}
+  .skyline{border:1px solid var(--line);border-radius:13px;overflow:hidden;background:linear-gradient(180deg,#a8d4ea 0%,#dcefe8 70%,#e9f2d8 100%)}
+  .skyline .row{display:flex;align-items:flex-end;gap:2px;padding:12px 10px 0;overflow-x:auto;min-height:128px}
+  .skyline .unit{flex:none;text-align:center;width:74px}
+  .skyline .unit svg{width:64px;height:76px}
+  .skyline .unit .nm{font-size:10.5px;color:#33505a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .skyline .gnd{height:9px;background:linear-gradient(180deg,#9cc184,#7ba95c)}
+  .skyline-empty{padding:26px 12px;text-align:center;color:#5d7d88;font-size:14px;width:100%}
+  .history{list-style:none;margin:0;padding:0}
+  .history li{display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px dashed var(--line)}
+  .history li:last-child{border-bottom:0}
+  .history .main{flex:1;min-width:0}
+  .history .t{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .history .s{font-size:12.5px;color:var(--ink2)}
+  .history .badge{font-size:12px;font-weight:700;border-radius:999px;padding:3px 10px;flex:none}
+  .badge.done{background:#fdeeda;color:#a85a14}
+  .badge.prog{background:#e5f2f2;color:var(--teal)}
+  .badge.fail{background:#fbe9e4;color:var(--red)}
+  .data-row{display:flex;gap:8px;flex-wrap:wrap}
+  .ghost-btn{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:9px 15px;font-weight:600}
+  .ghost-btn.danger{color:var(--red);border-color:#ecc9c2}
+  .privacy{font-size:12.5px;color:var(--ink2);margin-top:10px}
+
+  .atlas-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .atlas-tabs button{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:6px 16px;font-size:14px}
+  .atlas-tabs button.sel{border-color:var(--teal);background:var(--teal);color:#fff;font-weight:700}
+  .atlas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:11px}
+  .bcard{border:2px solid var(--line);border-radius:14px;padding:10px;background:var(--card2);text-align:left;position:relative;transition:.15s;width:100%}
+  .bcard:hover{border-color:#cdbf9f}
+  .bcard.current{border-color:var(--orange2);background:#fdf3e7}
+  .bcard .draw{height:86px;display:flex;align-items:flex-end;justify-content:center}
+  .bcard .draw svg{height:100%}
+  .bcard .nm{font-weight:800;font-size:15px;margin-top:6px}
+  .bcard .en{font-size:11px;color:var(--ink2);letter-spacing:.3px}
+  .bcard .loc{font-size:12.5px;color:var(--ink2)}
+  .bcard .req{font-size:12.5px;margin-top:5px;color:var(--orange2);font-weight:700}
+  .bcard .mini-progress{height:6px;background:#eadfc8;border-radius:99px;overflow:hidden;margin-top:6px}
+  .bcard .mini-progress > div{height:100%;background:linear-gradient(90deg,var(--gold),var(--orange))}
+  .bcard .st{font-size:12px;margin-top:5px;font-weight:700}
+  .bcard .st.built{color:var(--teal)}
+  .bcard .st.lock{color:#a08c5f}
+  .bcard.locked .draw{filter:grayscale(.7);opacity:.55}
+  .bcard.built-card .draw{filter:none}
+  .bcard .tier-tag{position:absolute;top:8px;right:8px;font-size:11px;background:#efe6cf;border-radius:99px;padding:2px 8px;color:#8a6d1f;font-weight:700}
+  #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:#173a3d;color:#e8f4f2;
+    padding:11px 20px;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:60;max-width:88vw;text-align:center}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  #doneBanner{display:none;background:linear-gradient(135deg,#fdf3e0,#e9f5ef);border:1px solid #ecd9ac;border-radius:13px;padding:13px 15px;margin-bottom:14px;font-size:14.5px}
+  #doneBanner.show{display:block}
+  .hidden{display:none !important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <img class="logo" src="icons/icon128.png" alt="专注城市建造图标" />
+    <div>
+      <h1>专注城市建造 <span style="font-size:13px;color:var(--ink2)">离线版 · 专注清单之城市建筑建造</span></h1>
+      <div class="sub">专注学习就是施工：一分钟一分钟，把各国各城市的著名建筑一座座盖起来</div>
+    </div>
+    <div class="chips">
+      <span class="chip">🏙️ 城市等级 <b id="chipLevel">启程小镇</b></span>
+      <span class="chip">🏛️ 已建成 <b id="chipBuilt">0</b> / 30</span>
+      <span class="chip">⏱️ 累计专注 <b id="chipHours">0</b> 小时</span>
+    </div>
+  </header>
+
+  <div id="doneBanner"></div>
+
+  <div class="layout">
+    <div>
+      <section class="card" id="siteCard">
+        <h2>🏗️ 施工现场</h2>
+        <div class="site-view">
+          <div class="bld" id="siteView"></div>
+          <div class="ground"></div>
+        </div>
+        <div id="idlePanel">
+          <div class="proj-name" id="projName">还没有选工地</div>
+          <div class="proj-loc" id="projLoc">去下面的「世界地标图鉴」里，点一座建筑开工。</div>
+          <div class="progress"><div id="projBar"></div></div>
+          <div class="proj-progress-txt" id="projTxt"></div>
+
+          <div class="lbl">这一轮专注多久</div>
+          <div class="dur-chips" id="durChips"></div>
+          <div class="slider-row">
+            <input type="range" id="durRange" min="5" max="180" step="5" value="25" />
+            <span class="val" id="durVal">25 分钟</span>
+          </div>
+
+          <div class="lbl">这一轮学什么 / 做什么</div>
+          <div class="tag-chips" id="tagChips"></div>
+          <input class="note-input" id="noteInput" type="text" maxlength="40" placeholder="写一句这一轮的任务（可不填），例如：背 50 个单词" />
+
+          <div class="switch-row">
+            <label class="switch"><input type="checkbox" id="soundToggle" checked /><span class="tr"></span></label>
+            <span class="desc">完工 / 建成时播放提示音</span>
+          </div>
+
+          <button class="build-btn" id="buildBtn" type="button">开始专注施工 🏗️</button>
+        </div>
+        <div id="sessionPanel" class="hidden">
+          <div class="sess-count" id="countText">25:00</div>
+          <div class="sess-stage" id="stageText">正在施工</div>
+          <div class="sess-meta" id="sessMeta"></div>
+          <div class="progress"><div id="sessBar"></div></div>
+          <button class="abandon-btn" id="abandonBtn" type="button">放弃这一轮（本次施工作废）</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>🚫 分心黑名单 <span class="hint">施工期间的硬规则</span></h2>
+        <div class="switch-row" style="margin-top:0">
+          <label class="switch"><input type="checkbox" id="blockToggle" checked /><span class="tr"></span></label>
+          <span class="desc"><b>深度专注</b>：施工专注期间打开下面任何网站，这一轮施工立刻倒塌作废（已累积的进度不清零）</span>
+        </div>
+        <div class="lbl">黑名单网站</div>
+        <div class="block-list" id="blockList"></div>
+        <div class="block-add">
+          <input id="blockInput" type="text" placeholder="输入域名，例如 douyin.com" />
+          <button class="small-btn" id="blockAddBtn" type="button">添加</button>
+        </div>
+        <div class="preset-row">常用：<span id="presetRow"></span></div>
+        <div class="warn-note">安装时浏览器会提示这个插件能读取标签页网址——那只是为了在本机对照黑名单，代码里没有任何上传，网址不会离开你的浏览器。不在专注时，它什么都不拦。</div>
+      </section>
+    </div>
+
+    <div>
+      <section class="card">
+        <h2>🌆 我的城市</h2>
+        <div class="skyline">
+          <div class="row" id="skylineRow"></div>
+          <div class="gnd"></div>
+        </div>
+        <div class="level-row">
+          <span class="lv" id="levelText">Lv.1 启程小镇</span>
+          <div class="progress"><div id="levelBar"></div></div>
+          <span class="proj-progress-txt" id="levelNext"></span>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>📊 城市数据</h2>
+        <div class="stats">
+          <div class="stat"><div class="num" id="stTodayMin">0</div><div class="cap">今日专注（分钟）</div></div>
+          <div class="stat"><div class="num" id="stTodayBuilt">0</div><div class="cap">今日建成（座）</div></div>
+          <div class="stat"><div class="num" id="stWeekMin">0</div><div class="cap">本周专注（分钟）</div></div>
+          <div class="stat"><div class="num" id="stFailed">0</div><div class="cap">倒塌作废（轮）</div></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>🕘 施工记录</h2>
+        <ul class="history" id="historyList"></ul>
+      </section>
+
+      <section class="card">
+        <h2>💾 我的数据</h2>
+        <div class="data-row">
+          <button class="ghost-btn" id="exportBtn" type="button">导出备份 JSON</button>
+          <button class="ghost-btn" id="importBtn" type="button">导入备份</button>
+          <input type="file" id="importFile" accept=".json,application/json" class="hidden" />
+          <button class="ghost-btn danger" id="clearBtn" type="button">清空全部数据</button>
+        </div>
+        <div class="privacy">离线版：城市、进度、黑名单和记录只保存在这个浏览器本地，不上传任何服务器。卸载插件或清理浏览器数据会清掉它们，重要记录请先导出备份。和「专注清单」「专注森林」是独立应用，数据不互通。</div>
+      </section>
+    </div>
+  </div>
+
+  <section class="card">
+    <h2>🗺️ 世界地标图鉴 <span class="hint">21 个国家 · 30 座著名建筑，点一座开工；城市等级升高后解锁更宏伟的地标</span></h2>
+    <div class="atlas-tabs" id="atlasTabs"></div>
+    <div class="atlas-grid" id="atlasGrid"></div>
+  </section>
+</div>
+<div id="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>
